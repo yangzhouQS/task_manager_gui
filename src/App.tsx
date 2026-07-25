@@ -80,13 +80,27 @@ export default function App() {
         <div className="win-body">
           <NavRail />
           <div className="win-content">
-            {tab === "processes" && <ProcessesView />}
-            {tab === "performance" && <PerformanceView />}
-            {tab === "appHistory" && <AppHistoryView />}
-            {tab === "startup" && <StartupView />}
-            {tab === "users" && <UsersView />}
-            {tab === "details" && <DetailsView />}
-            {tab === "services" && <ServicesView />}
+            <div className={"view-slot" + (tab === "processes" ? " active" : "")}>
+              <ProcessesView />
+            </div>
+            <div className={"view-slot" + (tab === "performance" ? " active" : "")}>
+              <PerformanceView />
+            </div>
+            <div className={"view-slot" + (tab === "appHistory" ? " active" : "")}>
+              <AppHistoryView />
+            </div>
+            <div className={"view-slot" + (tab === "startup" ? " active" : "")}>
+              <StartupView />
+            </div>
+            <div className={"view-slot" + (tab === "users" ? " active" : "")}>
+              <UsersView />
+            </div>
+            <div className={"view-slot" + (tab === "details" ? " active" : "")}>
+              <DetailsView />
+            </div>
+            <div className={"view-slot" + (tab === "services" ? " active" : "")}>
+              <ServicesView />
+            </div>
           </div>
         </div>
       </div>
