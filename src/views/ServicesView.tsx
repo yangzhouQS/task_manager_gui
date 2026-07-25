@@ -5,6 +5,7 @@ import { backend } from "@/lib/backend";
 import { useStore } from "@/store/useStore";
 import type { ServiceInfo } from "@/types";
 import ContextMenu, { type CtxState } from "@/components/ContextMenu";
+import AppIcon from "@/components/AppIcon";
 
 export default function ServicesView() {
   const services = useStore((s) => s.services);
@@ -75,7 +76,10 @@ export default function ServicesView() {
             title={s.description ?? ""}
             style={{ display: "flex", gap: 8, padding: "0 8px", height: 28, alignItems: "center", fontSize: 13, borderBottom: "1px solid var(--colorNeutralStroke1)" }}
           >
-            <span style={{ flex: "0 0 160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+            <span style={{ flex: "0 0 160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
+              <AppIcon path={s.exePath} size={16} />
+              {s.name}
+            </span>
             <span style={{ flex: "2 1 200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.displayName}</span>
             <span style={{ flex: "0 0 90px", color: s.state === "Running" ? "var(--colorPaletteGreenForeground1)" : s.state === "Stopped" ? "var(--colorNeutralForeground3)" : undefined }}>{s.state}</span>
             <span style={{ flex: "0 0 130px" }}>{s.startType}</span>

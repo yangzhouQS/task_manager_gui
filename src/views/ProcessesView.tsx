@@ -6,6 +6,7 @@ import { backend, formatBytes, formatSpeed } from "@/lib/backend";
 import { useStore } from "@/store/useStore";
 import type { ProcessInfo, ProcessKind } from "@/types";
 import ContextMenu, { type CtxState } from "@/components/ContextMenu";
+import AppIcon from "@/components/AppIcon";
 
 type SortKey = "name" | "cpu" | "memory" | "disk" | "net" | "gpu";
 
@@ -170,7 +171,7 @@ function ProcessRow({
       onDoubleClick={() => p.pid !== 0 && backend.openProperties(p.pid)}
     >
       <span className="proc-name">
-        <KindBadge kind={p.kind} />
+        <AppIcon path={p.exePath} kind={p.kind} />
         <span className="proc-name-text">{p.name}</span>
         {p.groupCount > 1 && (
           <span className="muted" style={{ fontSize: 11 }}>
@@ -184,22 +185,5 @@ function ProcessRow({
       <span className="row-cell">{formatSpeed(p.netMbps)}</span>
       <span className="row-cell">{p.gpuPercent.toFixed(0)}%</span>
     </div>
-  );
-}
-
-function KindBadge({ kind }: { kind: ProcessKind }) {
-  const color =
-    kind === "app" ? "#0f6cbd" : kind === "background" ? "#8764b8" : "#6b6b6b";
-  return (
-    <span
-      style={{
-        width: 16,
-        height: 16,
-        borderRadius: 4,
-        background: color,
-        flex: "0 0 auto",
-        display: "inline-block",
-      }}
-    />
   );
 }

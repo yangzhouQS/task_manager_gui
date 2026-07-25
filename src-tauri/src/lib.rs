@@ -4,6 +4,7 @@ mod apphistory;
 mod collector;
 mod commands;
 mod error;
+mod icon;
 mod models;
 mod pdh;
 mod performance;

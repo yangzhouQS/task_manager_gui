@@ -171,6 +171,9 @@ pub fn enumerate_startup() -> Vec<StartupEntry> {
         let pairs = unsafe { enum_run_values(*root, sub, false) };
         for (name, command) in pairs {
             let disabled = startup_approved_disabled(&name, *root, approved_sub);
+            let icon = crate::icon::exe_from_command(&command)
+                .as_deref()
+                .and_then(crate::icon::extract);
             out.push(StartupEntry {
                 name: name.clone(),
                 command,
@@ -178,11 +181,13 @@ pub fn enumerate_startup() -> Vec<StartupEntry> {
                 enabled: disabled.unwrap_or(true),
                 impact: "Not measured".to_string(),
                 publisher: None,
+                icon,
             });
         }
     }
 
     for (name, command, source, enabled) in startup_folders() {
+        let icon = crate::icon::extract(&command);
         out.push(StartupEntry {
             name,
             command,
@@ -190,6 +195,7 @@ pub fn enumerate_startup() -> Vec<StartupEntry> {
             enabled,
             impact: "Not measured".to_string(),
             publisher: None,
+            icon,
         });
     }
 

@@ -1,5 +1,6 @@
 import { Button } from "@fluentui/react-components";
 import { backend, formatCpuTime } from "@/lib/backend";
+import AppIcon from "@/components/AppIcon";
 import { useStore } from "@/store/useStore";
 
 export default function AppHistoryView() {
@@ -29,7 +30,10 @@ export default function AppHistoryView() {
             key={h.name}
             style={{ display: "flex", gap: 8, padding: "0 8px", height: 28, alignItems: "center", fontSize: 13, borderBottom: "1px solid var(--colorNeutralStroke1)" }}
           >
-            <span style={{ flex: "2 1 200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.name}</span>
+            <span style={{ flex: "2 1 200px", display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
+              <AppIcon direct={h.icon} size={16} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.name}</span>
+            </span>
             <span style={{ flex: "0 0 120px" }}>{formatCpuTime(h.totalCpuSec)}</span>
             <span style={{ flex: "1 1 120px" }}>{h.networkMb.toFixed(1)} MB</span>
             <span style={{ flex: "1 1 120px" }}>{h.meteredMb.toFixed(1)} MB</span>

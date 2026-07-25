@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@fluentui/react-components";
 import { backend } from "@/lib/backend";
+import AppIcon from "@/components/AppIcon";
 import type { StartupEntry } from "@/types";
 
 export default function StartupView() {
@@ -42,7 +43,10 @@ export default function StartupView() {
             <span style={{ flex: "0 0 90px", color: effective(e) ? "#107c10" : "#c50f1f" }}>
               {effective(e) ? "已启用" : "已禁用"}
             </span>
-            <span style={{ flex: "1 1 160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
+            <span style={{ flex: "1 1 160px", display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
+              <AppIcon direct={e.icon} size={16} />
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</span>
+            </span>
             <span style={{ flex: "2 1 220px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} className="muted">{e.command}</span>
             <span style={{ flex: "1 1 120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.source}</span>
             <span style={{ flex: "0 0 100px" }} className="muted">{e.impact}</span>

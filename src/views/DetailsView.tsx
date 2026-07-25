@@ -3,6 +3,7 @@ import { backend, formatBytes } from "@/lib/backend";
 import { useStore } from "@/store/useStore";
 import type { ProcessInfo } from "@/types";
 import ContextMenu, { type CtxState } from "@/components/ContextMenu";
+import AppIcon from "@/components/AppIcon";
 
 type Key = "pid" | "name" | "user" | "cpu" | "memory" | "status";
 
@@ -93,7 +94,10 @@ export default function DetailsView() {
             style={{ display: "flex", gap: 8, padding: "0 8px", height: 30, alignItems: "center", fontSize: 13, borderBottom: "1px solid var(--colorNeutralStroke1)" }}
           >
             <span style={{ flex: "0 0 70px" }}>{p.pid}</span>
-            <span style={{ flex: "2 1 200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</span>
+            <span style={{ flex: "2 1 200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
+              <AppIcon path={p.exePath} size={16} />
+              {p.name}
+            </span>
             <span style={{ flex: "1 1 120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pidUser.get(p.pid) ?? "—"}</span>
             <span style={{ flex: "0 0 80px" }}>{p.cpuPercent.toFixed(0)}%</span>
             <span style={{ flex: "0 0 100px" }}>{formatBytes(p.memoryKb)}</span>

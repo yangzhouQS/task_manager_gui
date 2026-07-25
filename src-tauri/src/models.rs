@@ -104,6 +104,7 @@ pub struct StartupEntry {
     pub enabled: bool,
     pub impact: String,
     pub publisher: Option<String>,
+    pub icon: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

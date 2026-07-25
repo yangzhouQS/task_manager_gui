@@ -23,6 +23,7 @@ interface AppState {
   services: ServiceInfo[];
   users: UserSession[];
   appHistory: AppHistoryEntry[];
+  iconMap: Record<string, string>;
 
   setTab: (t: TabId) => void;
   setTheme: (t: ThemeMode) => void;
@@ -34,6 +35,7 @@ interface AppState {
   setServices: (s: ServiceInfo[]) => void;
   setUsers: (u: UserSession[]) => void;
   setAppHistory: (h: AppHistoryEntry[]) => void;
+  setIcon: (path: string, icon: string) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -54,6 +56,7 @@ export const useStore = create<AppState>((set) => ({
   services: [],
   users: [],
   appHistory: [],
+  iconMap: {},
 
   setTab: (t) => set({ tab: t }),
   setTheme: (t) => set({ theme: t }),
@@ -65,4 +68,5 @@ export const useStore = create<AppState>((set) => ({
   setServices: (s) => set({ services: s }),
   setUsers: (u) => set({ users: u }),
   setAppHistory: (h) => set({ appHistory: h }),
+  setIcon: (path, icon) => set((s) => ({ iconMap: { ...s.iconMap, [path]: icon } })),
 }));

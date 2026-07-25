@@ -82,6 +82,7 @@ export interface StartupEntry {
   enabled: boolean;
   impact: string;
   publisher: string | null;
+  icon: string | null;
 }
 
 export interface UserSession {

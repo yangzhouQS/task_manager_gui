@@ -12,6 +12,7 @@ struct HistEntry {
     metered_mb: f64,
     tile_updates: u32,
     icon: Option<String>,
+    exe: Option<String>,
 }
 
 pub struct AppHistory {
@@ -38,6 +39,7 @@ impl AppHistory {
             let core_seconds = (p.cpu_percent as f64 / 100.0) * dt;
             let entry = self.map.entry(name).or_default();
             entry.cpu_sec += core_seconds as f32;
+            entry.exe = p.exe_path.clone().or(entry.exe.take());
             entry.icon = p.icon.clone().or(entry.icon.take());
         }
     }
@@ -48,7 +50,11 @@ impl AppHistory {
             .iter()
             .map(|(name, h)| AppHistoryEntry {
                 name: name.clone(),
-                icon: h.icon.clone(),
+                icon: h
+                    .exe
+                    .as_deref()
+                    .and_then(|e| crate::icon::get(e))
+                    .or(h.icon.clone()),
                 total_cpu_sec: h.cpu_sec,
                 network_mb: h.network_mb,
                 metered_mb: h.metered_mb,

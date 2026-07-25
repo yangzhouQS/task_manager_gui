@@ -31,6 +31,7 @@ export default function App() {
   const setServices = useStore((s) => s.setServices);
   const setUsers = useStore((s) => s.setUsers);
   const setAppHistory = useStore((s) => s.setAppHistory);
+  const setIcon = useStore((s) => s.setIcon);
   const alwaysOnTop = useStore((s) => s.alwaysOnTop);
   const tab = useStore((s) => s.tab);
 
@@ -47,6 +48,9 @@ export default function App() {
     subscribe<AppHistoryEntry[]>("tm://appHistory", (h) => setAppHistory(h)).then((u) =>
       unlistens.push(u)
     );
+    subscribe<{ path: string; icon: string }>("tm://icon", (p) => setIcon(p.path, p.icon)).then(
+      (u) => unlistens.push(u)
+    );
     backend.getUsers();
     backend.getAppHistory();
     backend.getStartup();
@@ -60,7 +64,7 @@ export default function App() {
       unlistens.forEach((u) => u());
       mq.removeEventListener("change", onChange);
     };
-  }, [setMeta, setTheme, setProcesses, setPerformance, setServices, setUsers, setAppHistory]);
+  }, [setMeta, setTheme, setProcesses, setPerformance, setServices, setUsers, setAppHistory, setIcon]);
 
   useEffect(() => {
     backend.toggleAlwaysOnTop(alwaysOnTop);
