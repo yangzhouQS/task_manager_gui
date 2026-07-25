@@ -1,0 +1,260 @@
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: transparent;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.win-root {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+.win-appbar {
+  flex: 0 0 auto;
+}
+
+.win-body {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+
+.win-navrail {
+  flex: 0 0 auto;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.win-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 16px 12px;
+  overflow: auto;
+}
+
+.win-view {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.titlebar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px 0 12px;
+  gap: 8px;
+}
+
+.titlebar-drag {
+  flex: 1 1 auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.win-caption {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.caption-btn {
+  width: 46px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--colorNeutralForeground1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.caption-btn:hover {
+  background: rgba(128, 128, 128, 0.18);
+}
+
+.caption-btn.close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+.row-grid {
+  display: grid;
+  grid-template-columns: 1fr 90px 110px 90px 90px 90px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  height: 36px;
+  border-bottom: 1px solid var(--colorNeutralStroke1, rgba(0, 0, 0, 0.16));
+}
+
+.row-header {
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 1px solid var(--colorNeutralStroke1Accessible, rgba(0, 0, 0, 0.28));
+}
+
+.row-cell {
+  font-size: 13px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.proc-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.proc-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted {
+  opacity: 0.62;
+}
+
+.perf-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+}
+
+.perf-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.perf-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--colorNeutralForeground1);
+  text-align: left;
+}
+
+.perf-nav-item:hover {
+  background: var(--colorSubtleBackgroundHover);
+}
+
+.perf-nav-item.active {
+  background: var(--colorSubtleBackgroundHover);
+  color: var(--colorBrandForeground1);
+}
+
+.perf-nav-icon {
+  display: inline-flex;
+  font-size: 18px;
+}
+
+.perf-nav-label {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perf-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  overflow: auto;
+}
+
+.perf-chart-box {
+  flex: 0 0 auto;
+  width: 100%;
+  background: var(--colorNeutralBackground2);
+  border: 1px solid var(--colorNeutralStroke1);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.perf-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 6px 24px;
+  margin-top: 8px;
+}
+
+.perf-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--colorNeutralForeground1);
+  border-bottom: 1px solid var(--colorNeutralStroke1);
+  padding: 4px 0;
+}
+
+.bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(128, 128, 128, 0.25);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.scroll-y {
+  overflow-y: auto;
+}
+
+.scroll-y::-webkit-scrollbar {
+  width: 10px;
+}
+.scroll-y::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.4);
+  border-radius: 5px;
+}
