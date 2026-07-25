@@ -2,9 +2,10 @@ use std::path::PathBuf;
 
 use windows::core::{PCWSTR, PWSTR};
 use windows::Win32::System::Registry::{
-    RegCloseKey, RegEnumValueW, RegOpenKeyExW, RegQueryInfoKeyW, RegQueryValueExW, HKEY,
-    HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WOW64_32KEY, KEY_WOW64_64KEY,
-    REG_BINARY, REG_EXPAND_SZ, REG_VALUE_TYPE, REG_SZ,
+    RegCloseKey, RegCreateKeyExW, RegDeleteValueW, RegEnumValueW, RegOpenKeyExW, RegQueryInfoKeyW,
+    RegQueryValueExW, RegSetValueExW, HKEY, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ,
+    KEY_WOW64_32KEY, KEY_WOW64_64KEY, KEY_WRITE, REG_BINARY, REG_EXPAND_SZ, REG_OPTION_NON_VOLATILE,
+    REG_VALUE_TYPE, REG_SZ,
 };
 
 use crate::models::StartupEntry;
@@ -202,7 +203,51 @@ pub fn enumerate_startup() -> Vec<StartupEntry> {
     out
 }
 
-#[allow(dead_code)]
-pub fn set_startup_enabled(_name: &str, _source: &str, _enabled: bool) -> anyhow::Result<()> {
+pub fn set_startup_enabled(name: &str, source: &str, enabled: bool) -> anyhow::Result<()> {
+    let root = if source.starts_with("HKCU") {
+        HKEY_CURRENT_USER
+    } else if source.starts_with("HKLM") {
+        HKEY_LOCAL_MACHINE
+    } else {
+        return Ok(()); // 文件夹启动项无 StartupApproved 机制
+    };
+
+    let sub = "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run";
+    unsafe {
+        let wsub = crate::util::to_wide(sub);
+        let mut handle = HKEY::default();
+        if RegCreateKeyExW(
+            root,
+            PCWSTR(wsub.as_ptr()),
+            0,
+            PCWSTR::null(),
+            REG_OPTION_NON_VOLATILE,
+            KEY_WRITE | KEY_WOW64_64KEY,
+            None,
+            &mut handle,
+            None,
+        )
+        .0
+            != 0
+        {
+            return Ok(());
+        }
+
+        let wname = crate::util::to_wide(name);
+        if enabled {
+            let _ = RegDeleteValueW(handle, PCWSTR(wname.as_ptr()));
+        } else {
+            // 12 字节：首个 DWORD=0 表示禁用，后 8 字节时间戳置 0
+            let data: [u8; 12] = [0; 12];
+            let _ = RegSetValueExW(
+                handle,
+                PCWSTR(wname.as_ptr()),
+                0,
+                REG_BINARY,
+                Some(&data),
+            );
+        }
+        let _ = RegCloseKey(handle);
+    }
     Ok(())
 }

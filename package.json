@@ -17,6 +17,7 @@
     "@fluentui/react-icons": "^2.0.316",
     "@tanstack/react-virtual": "^3.14.8",
     "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-dialog": "^2.2.0",
     "@tauri-apps/plugin-shell": "^2.3.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

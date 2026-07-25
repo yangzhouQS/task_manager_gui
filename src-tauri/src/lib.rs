@@ -25,6 +25,8 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .manage(state::AppState::new(cores))
         .setup(|app| {
             let handle = app.handle().clone();
@@ -46,6 +48,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_app_info,
             commands::set_active_tab,
+            commands::set_refresh_speed,
             commands::get_processes,
             commands::get_performance,
             commands::end_task,
@@ -64,6 +67,7 @@ pub fn run() {
             commands::control_service,
             commands::refresh_services,
             commands::get_startup,
+            commands::set_startup_enabled,
             commands::get_users,
             commands::get_app_history,
             commands::reset_app_history,

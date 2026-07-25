@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { backend, formatBytes } from "@/lib/backend";
 import { useStore } from "@/store/useStore";
 import type { ProcessInfo } from "@/types";
@@ -14,6 +15,7 @@ export default function DetailsView() {
   const [key, setKey] = useState<Key>("pid");
   const [asc, setAsc] = useState(true);
   const [menu, setMenu] = useState<CtxState | null>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     backend.getUsers();
@@ -48,6 +50,13 @@ export default function DetailsView() {
       }
     });
   }, [processes, search, key, asc, pidUser]);
+
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 30,
+    overscan: 16,
+  });
 
   const open = (p: ProcessInfo, e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,24 +95,31 @@ export default function DetailsView() {
         {col("memory", "内存", "100px")}
         {col("status", "状态", "1 1 100px")}
       </div>
-      <div className="win-view scroll-y">
-        {rows.map((p) => (
-          <div
-            key={p.pid}
-            onContextMenu={(e) => open(p, e)}
-            style={{ display: "flex", gap: 8, padding: "0 8px", height: 30, alignItems: "center", fontSize: 13, borderBottom: "1px solid var(--colorNeutralStroke1)" }}
-          >
-            <span style={{ flex: "0 0 70px" }}>{p.pid}</span>
-            <span style={{ flex: "2 1 200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
-              <AppIcon path={p.exePath} size={16} />
-              {p.name}
-            </span>
-            <span style={{ flex: "1 1 120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pidUser.get(p.pid) ?? "—"}</span>
-            <span style={{ flex: "0 0 80px" }}>{p.cpuPercent.toFixed(0)}%</span>
-            <span style={{ flex: "0 0 100px" }}>{formatBytes(p.memoryKb)}</span>
-            <span style={{ flex: "1 1 100px" }}>{p.status}</span>
-          </div>
-        ))}
+      <div ref={parentRef} style={{ flex: 1, minHeight: 0, overflow: "auto", scrollbarGutter: "stable" }}>
+        <div style={{ height: virtualizer.getTotalSize(), position: "relative", width: "100%" }}>
+          {virtualizer.getVirtualItems().map((vi) => {
+            const p = rows[vi.index];
+            return (
+              <div
+                key={vi.key}
+                data-index={vi.index}
+                ref={virtualizer.measureElement}
+                onContextMenu={(e) => open(p, e)}
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", transform: `translateY(${vi.start}px)`, display: "flex", gap: 8, padding: "0 8px", height: 30, alignItems: "center", fontSize: 13, borderBottom: "1px solid var(--colorNeutralStroke1)" }}
+              >
+                <span style={{ flex: "0 0 70px" }}>{p.pid}</span>
+                <span style={{ flex: "2 1 200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6, color: p.status === "Not responding" ? "var(--colorPaletteRedForeground1)" : undefined }}>
+                  <AppIcon path={p.exePath} size={16} />
+                  {p.name}
+                </span>
+                <span style={{ flex: "1 1 120px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pidUser.get(p.pid) ?? "—"}</span>
+                <span style={{ flex: "0 0 80px" }}>{p.cpuPercent.toFixed(0)}%</span>
+                <span style={{ flex: "0 0 100px" }}>{formatBytes(p.memoryKb)}</span>
+                <span style={{ flex: "1 1 100px" }}>{p.status}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
       <ContextMenu state={menu} onClose={() => setMenu(null)} />
     </div>

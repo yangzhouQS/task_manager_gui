@@ -44,6 +44,7 @@ struct NetEntry {
 struct GpuPdh {
     pdh: Pdh,
     engines_by_luid: HashMap<u64, Vec<Counter>>,
+    engines_by_pid: HashMap<u32, Vec<Counter>>,
     adapters: Vec<(u64, String, u64, u64)>,
 }
 
@@ -65,6 +66,20 @@ impl PerformanceCollector {
             gpu: build_gpu()?,
             cores,
         })
+    }
+
+    /// 按 PID 汇总 GPU 利用率（用于进程页 GPU 列）。
+    pub fn gpu_by_pid(&self) -> std::collections::HashMap<u32, f32> {
+        self.gpu.pdh.collect();
+        let mut map = std::collections::HashMap::new();
+        for (pid, counters) in &self.gpu.engines_by_pid {
+            let mut sum = 0.0_f64;
+            for c in counters {
+                sum += self.gpu.pdh.value(*c).unwrap_or(0.0);
+            }
+            map.insert(*pid, sum.min(100.0) as f32);
+        }
+        map
     }
 
     pub fn snapshot(&self) -> PerformanceSnapshot {
@@ -275,11 +290,17 @@ fn build_gpu() -> anyhow::Result<GpuPdh> {
     let pdh = Pdh::new()?;
     let adapters = enum_dxgi_adapters();
     let mut engines_by_luid: HashMap<u64, Vec<Counter>> = HashMap::new();
+    let mut engines_by_pid: HashMap<u32, Vec<Counter>> = HashMap::new();
     for p in pdh::expand("\\GPU Engine(*)\\Utilization Percentage") {
         if let Some(inst) = pdh::parse_instance(&p) {
-            if let Some(luid) = parse_engine_luid(&inst) {
-                if let Ok(c) = pdh.add(&p) {
-                    engines_by_luid.entry(luid).or_default().push(c);
+            let luid = parse_engine_luid(&inst);
+            let pid = parse_engine_pid(&inst);
+            if let Ok(c) = pdh.add(&p) {
+                if let Some(l) = luid {
+                    engines_by_luid.entry(l).or_default().push(c);
+                }
+                if let Some(pp) = pid {
+                    engines_by_pid.entry(pp).or_default().push(c);
                 }
             }
         }
@@ -287,6 +308,7 @@ fn build_gpu() -> anyhow::Result<GpuPdh> {
     Ok(GpuPdh {
         pdh,
         engines_by_luid,
+        engines_by_pid,
         adapters,
     })
 }
@@ -308,6 +330,19 @@ fn parse_engine_luid(inst: &str) -> Option<u64> {
         (Some(l), Some(h)) => Some((h << 32) | l),
         _ => None,
     }
+}
+
+fn parse_engine_pid(inst: &str) -> Option<u32> {
+    let parts: Vec<&str> = inst.split('_').collect();
+    let mut iter = parts.iter();
+    while let Some(p) = iter.next() {
+        if *p == "pid" {
+            if let Some(n) = iter.next() {
+                return n.parse::<u32>().ok();
+            }
+        }
+    }
+    None
 }
 
 fn enum_dxgi_adapters() -> Vec<(u64, String, u64, u64)> {

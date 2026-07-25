@@ -10,7 +10,7 @@ import {
   Checkbox,
   Label,
 } from "@fluentui/react-components";
-
+import { open } from "@tauri-apps/plugin-dialog";
 import { backend } from "@/lib/backend";
 
 const fieldStyle: React.CSSProperties = {
@@ -38,12 +38,27 @@ export default function RunTaskDialog({ onClose }: { onClose: () => void }) {
         <DialogContent>
           <div style={fieldStyle}>
             <Label>打开</Label>
-            <Input
-              value={exe}
-              onChange={(_, d) => setExe(d.value)}
-              placeholder="例如 notepad.exe 或完整路径"
-              autoFocus
-            />
+            <div style={{ display: "flex", gap: 6 }}>
+              <Input
+                value={exe}
+                onChange={(_, d) => setExe(d.value)}
+                placeholder="例如 notepad.exe 或完整路径"
+                style={{ flex: 1 }}
+                autoFocus
+              />
+              <Button
+                appearance="subtle"
+                onClick={async () => {
+                  const sel = await open({
+                    multiple: false,
+                    filters: [{ name: "程序", extensions: ["exe", "bat", "cmd", "lnk"] }],
+                  });
+                  if (typeof sel === "string") setExe(sel);
+                }}
+              >
+                浏览
+              </Button>
+            </div>
           </div>
           <div style={fieldStyle}>
             <Label>参数（可选）</Label>

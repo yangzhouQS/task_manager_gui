@@ -29,15 +29,28 @@ pub fn spawn(app: AppHandle, state: Arc<AppState>) {
         let mut tick: u32 = 0;
 
         loop {
-            std::thread::sleep(Duration::from_millis(1000));
+            let interval = state
+                .refresh_ms
+                .load(std::sync::atomic::Ordering::Relaxed);
+            if interval == 0 {
+                std::thread::sleep(Duration::from_millis(400));
+                continue;
+            }
+            std::thread::sleep(Duration::from_millis(interval as u64));
             let now = Instant::now();
             let dt = now.duration_since(last).as_secs_f64();
             last = now;
             tick = tick.wrapping_add(1);
 
-            let procs = proc_collector.collect();
+            let mut procs = proc_collector.collect();
 
             if let Some(perf) = &perf {
+                let gpu_map = perf.gpu_by_pid();
+                for p in procs.iter_mut() {
+                    if p.pid != 0 {
+                        p.gpu_percent = gpu_map.get(&p.pid).copied().unwrap_or(0.0);
+                    }
+                }
                 let snap = perf.snapshot();
                 *state.performance.write() = Some(snap.clone());
                 let _ = app.emit("tm://performance", snap);

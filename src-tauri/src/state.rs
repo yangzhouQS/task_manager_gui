@@ -1,4 +1,4 @@
-use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicBool, AtomicU32};
 use std::sync::Arc;
 
 use parking_lot::{Mutex, RwLock};
@@ -12,6 +12,7 @@ pub struct AppState {
     pub history: Mutex<AppHistory>,
     pub active_tab: RwLock<TabId>,
     pub force_services: AtomicBool,
+    pub refresh_ms: AtomicU32,
     pub elevated: bool,
     pub cores: u32,
 }
@@ -24,6 +25,7 @@ impl AppState {
             history: Mutex::new(AppHistory::new(cores)),
             active_tab: RwLock::new(TabId::Processes),
             force_services: AtomicBool::new(false),
+            refresh_ms: AtomicU32::new(1000),
             elevated: crate::util::is_elevated(),
             cores,
         })

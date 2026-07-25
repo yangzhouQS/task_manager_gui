@@ -9,6 +9,7 @@ import type {
 } from "@/types";
 
 export type ThemeMode = "light" | "dark";
+export type RefreshSpeed = "high" | "normal" | "low" | "paused";
 
 interface AppState {
   tab: TabId;
@@ -17,6 +18,7 @@ interface AppState {
   search: string;
   elevated: boolean;
   cores: number;
+  refresh: RefreshSpeed;
 
   processes: ProcessInfo[];
   performance: PerformanceSnapshot | null;
@@ -30,6 +32,7 @@ interface AppState {
   toggleAlwaysOnTop: () => void;
   setSearch: (s: string) => void;
   setMeta: (elevated: boolean, cores: number) => void;
+  setRefresh: (r: RefreshSpeed) => void;
   setProcesses: (p: ProcessInfo[]) => void;
   setPerformance: (p: PerformanceSnapshot) => void;
   setServices: (s: ServiceInfo[]) => void;
@@ -50,6 +53,7 @@ export const useStore = create<AppState>((set) => ({
   search: "",
   elevated: false,
   cores: 1,
+  refresh: "normal",
 
   processes: [],
   performance: null,
@@ -63,6 +67,7 @@ export const useStore = create<AppState>((set) => ({
   toggleAlwaysOnTop: () => set((s) => ({ alwaysOnTop: !s.alwaysOnTop })),
   setSearch: (s) => set({ search: s }),
   setMeta: (elevated, cores) => set({ elevated, cores }),
+  setRefresh: (r) => set({ refresh: r }),
   setProcesses: (p) => set({ processes: p }),
   setPerformance: (p) => set({ performance: p }),
   setServices: (s) => set({ services: s }),

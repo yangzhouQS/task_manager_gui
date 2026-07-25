@@ -86,6 +86,19 @@ pub fn refresh_services(state: tauri::State<'_, Arc<AppState>>) {
 }
 
 #[tauri::command]
+pub fn set_refresh_speed(speed: String, state: tauri::State<'_, Arc<AppState>>) {
+    let ms = match speed.as_str() {
+        "high" => 500,
+        "low" => 2000,
+        "paused" => 0,
+        _ => 1000,
+    };
+    state
+        .refresh_ms
+        .store(ms, std::sync::atomic::Ordering::Relaxed);
+}
+
+#[tauri::command]
 pub fn get_processes(state: tauri::State<'_, Arc<AppState>>) -> Vec<ProcessInfo> {
     state.processes.read().clone()
 }
@@ -274,6 +287,12 @@ pub fn control_service(name: String, action: String) -> AppResult<()> {
 #[tauri::command]
 pub fn get_startup() -> Vec<crate::models::StartupEntry> {
     startup::enumerate_startup()
+}
+
+#[tauri::command]
+pub fn set_startup_enabled(name: String, source: String, enabled: bool) -> AppResult<()> {
+    startup::set_startup_enabled(&name, &source, enabled)
+        .map_err(|e| AppError::Generic(e.to_string()))
 }
 
 #[tauri::command]

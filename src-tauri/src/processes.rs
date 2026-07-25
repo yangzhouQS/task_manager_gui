@@ -14,7 +14,7 @@ use windows::Win32::System::Threading::{
 use windows::Win32::System::WindowsProgramming::QueryProcessCycleTime;
 use windows::Win32::UI::WindowsAndMessaging::{
     EnumWindows, GetWindowLongPtrW, GetWindowTextLengthW, GetWindowThreadProcessId,
-    IsWindowVisible, GWL_EXSTYLE, WS_EX_TOOLWINDOW,
+    IsHungAppWindow, IsWindowVisible, GWL_EXSTYLE, WS_EX_TOOLWINDOW,
 };
 
 use crate::models::{ProcessInfo, ProcessKind};
@@ -86,7 +86,7 @@ impl ProcessCollector {
             .map(|p| p.pid)
             .unwrap_or(0);
 
-        let app_pids = enum_app_pids();
+        let app_windows = enum_app_windows();
 
         let idle_now = query_idle_cycles(self.num_cores);
         let idle_delta = idle_now.saturating_sub(self.prev_idle);
@@ -113,8 +113,13 @@ impl ProcessCollector {
                 0.0
             };
 
-            let kind = classify(p, services_pid, &app_pids);
+            let kind = classify(p, services_pid, &app_windows.app);
             let power = power_usage(cpu, disk_mbps);
+            let status = if app_windows.hung.contains(&p.pid) {
+                "Not responding".to_string()
+            } else {
+                "Running".to_string()
+            };
 
             out.push(ProcessInfo {
                 pid: p.pid,
@@ -134,7 +139,7 @@ impl ProcessCollector {
                 power_usage: power,
                 thread_count: p.threads,
                 handle_count: p.handles,
-                status: "Running".to_string(),
+                status,
                 kind,
                 group_count: 0,
                 user: None,
@@ -312,17 +317,25 @@ fn power_usage(cpu: f64, disk: f32) -> String {
     }
 }
 
-fn enum_app_pids() -> HashSet<u32> {
+struct AppWindows {
+    app: HashSet<u32>,
+    hung: HashSet<u32>,
+}
+
+fn enum_app_windows() -> AppWindows {
     unsafe {
-        let mut set: HashSet<u32> = HashSet::new();
-        let ptr = &mut set as *mut HashSet<u32> as isize;
+        let mut aw = AppWindows {
+            app: HashSet::new(),
+            hung: HashSet::new(),
+        };
+        let ptr = &mut aw as *mut AppWindows as isize;
         let _ = EnumWindows(Some(enum_proc), LPARAM(ptr));
-        set
+        aw
     }
 }
 
 unsafe extern "system" fn enum_proc(hwnd: HWND, lparam: LPARAM) -> BOOL {
-    let set = &mut *(lparam.0 as *mut HashSet<u32>);
+    let aw = &mut *(lparam.0 as *mut AppWindows);
     if !IsWindowVisible(hwnd).as_bool() || GetWindowTextLengthW(hwnd) == 0 {
         return BOOL(1);
     }
@@ -333,7 +346,10 @@ unsafe extern "system" fn enum_proc(hwnd: HWND, lparam: LPARAM) -> BOOL {
     let mut pid: u32 = 0;
     GetWindowThreadProcessId(hwnd, Some(&mut pid));
     if pid != 0 {
-        set.insert(pid);
+        aw.app.insert(pid);
+        if IsHungAppWindow(hwnd).as_bool() {
+            aw.hung.insert(pid);
+        }
     }
     BOOL(1)
 }

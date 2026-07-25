@@ -14,6 +14,7 @@ import type {
 
 import TitleBar from "@/components/TitleBar";
 import NavRail from "@/components/NavRail";
+import StatusBar from "@/components/StatusBar";
 import ProcessesView from "@/views/ProcessesView";
 import PerformanceView from "@/views/PerformanceView";
 import AppHistoryView from "@/views/AppHistoryView";
@@ -34,6 +35,7 @@ export default function App() {
   const setIcon = useStore((s) => s.setIcon);
   const alwaysOnTop = useStore((s) => s.alwaysOnTop);
   const tab = useStore((s) => s.tab);
+  const refresh = useStore((s) => s.refresh);
 
   useEffect(() => {
     let alive = true;
@@ -69,6 +71,10 @@ export default function App() {
   useEffect(() => {
     backend.toggleAlwaysOnTop(alwaysOnTop);
   }, [alwaysOnTop]);
+
+  useEffect(() => {
+    backend.setRefreshSpeed(refresh);
+  }, [refresh]);
 
   useEffect(() => {
     backend.setActiveTab(tab);
@@ -107,6 +113,7 @@ export default function App() {
             </div>
           </div>
         </div>
+        <StatusBar />
       </div>
     </FluentProvider>
   );

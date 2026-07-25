@@ -20,6 +20,12 @@ export default function StartupView() {
   const effective = (e: StartupEntry) =>
     overrides[e.name + e.source] ?? e.enabled;
 
+  const toggle = async (e: StartupEntry) => {
+    const newVal = !effective(e);
+    setOverrides({ ...overrides, [e.name + e.source]: newVal });
+    await backend.setStartupEnabled(e.name, e.source, newVal);
+  };
+
   return (
     <div className="win-view">
       <div style={{ marginBottom: 8 }}>
@@ -40,8 +46,18 @@ export default function StartupView() {
             key={e.name + e.source}
             style={{ display: "flex", gap: 8, padding: "0 8px", height: 30, alignItems: "center", fontSize: 13, borderBottom: "1px solid var(--colorNeutralStroke1)" }}
           >
-            <span style={{ flex: "0 0 90px", color: effective(e) ? "#107c10" : "#c50f1f" }}>
-              {effective(e) ? "已启用" : "已禁用"}
+            <span style={{ flex: "0 0 150px", display: "flex", alignItems: "center", gap: 6 }}>
+              <Button
+                size="small"
+                appearance="subtle"
+                disabled={!e.source.startsWith("HKCU") && !e.source.startsWith("HKLM")}
+                onClick={() => toggle(e)}
+              >
+                {effective(e) ? "禁用" : "启用"}
+              </Button>
+              <span style={{ color: effective(e) ? "var(--colorPaletteGreenForeground1)" : "var(--colorPaletteRedForeground1)" }}>
+                {effective(e) ? "已启用" : "已禁用"}
+              </span>
             </span>
             <span style={{ flex: "1 1 160px", display: "flex", alignItems: "center", gap: 6, overflow: "hidden" }}>
               <AppIcon direct={e.icon} size={16} />

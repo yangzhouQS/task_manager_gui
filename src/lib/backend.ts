@@ -31,6 +31,9 @@ export const backend = {
   refreshServices: () => invoke("refresh_services"),
   openServicesMsc: () => invoke("run_new_task", { exe: "services.msc", args: null, admin: null }),
   getStartup: () => invoke<StartupEntry[]>("get_startup"),
+  setStartupEnabled: (name: string, source: string, enabled: boolean) =>
+    invoke("set_startup_enabled", { name, source, enabled }),
+  setRefreshSpeed: (speed: string) => invoke("set_refresh_speed", { speed }),
   getUsers: () => invoke<UserSession[]>("get_users"),
   getAppHistory: () => invoke<AppHistoryEntry[]>("get_app_history"),
   resetAppHistory: () => invoke("reset_app_history"),
